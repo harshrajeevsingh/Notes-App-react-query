@@ -11,6 +11,7 @@ import Layout from "./components/Layout";
 import NewNote from "./components/NewNote";
 import Notes from "./components/Notes";
 import { queryClient } from "./utility/queryClient";
+import ViewNote from "./components/ViewNote";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
         element: <Notes />,
       },
       { path: "/new-note", element: <NewNote /> },
+      { path: "/view-note/:id", element: <ViewNote /> },
       { path: "/edit-note/:id", element: <EditNote /> },
       { path: "/find-note", element: <FindNote /> },
     ],

@@ -23,6 +23,12 @@ export async function addNewNote(note) {
   });
   return await handleResponse(response);
 }
+
+export async function fetchNoteById(id) {
+  const response = await fetch(`http://localhost:8001/notes/${id}`);
+  return await handleResponse(response);
+}
+
 async function handleResponse(response) {
   if (!response.ok) {
     const error = new Error("Error occured while fettching the data");
