@@ -24,11 +24,24 @@ export async function addNewNote(note) {
   return await handleResponse(response);
 }
 
-export async function fetchNoteById(id) {
-  const response = await fetch(`http://localhost:8001/notes/${id}`);
+export async function fetchNoteById({ signal, id }) {
+  const response = await fetch(`http://localhost:8001/notes/${id}`, { signal });
   return await handleResponse(response);
 }
+export async function updateNote({ id, payload }) {
+  const response = await fetch(`http://localhost:8001/notes/${id}/edit`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: payload.title,
+      description: payload.description,
+    }),
+  });
 
+  return await handleResponse(response);
+}
 async function handleResponse(response) {
   if (!response.ok) {
     const error = new Error("Error occured while fettching the data");

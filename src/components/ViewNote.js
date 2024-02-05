@@ -18,7 +18,7 @@ const ViewNote = () => {
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["notes", { id: params.id }],
-    queryFn: () => fetchNoteById(params.id),
+    queryFn: ({ signal }) => fetchNoteById({ signal, id: params.id }),
   });
 
   let content = "";
