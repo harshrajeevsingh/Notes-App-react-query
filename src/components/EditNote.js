@@ -1,49 +1,49 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import ErrorBlock from './ErrorBlock';
-import LoadingBlock from './LoadingBlock';
-import NoteForm from './NoteForm';
-
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import ErrorBlock from "./ErrorBlock";
+import LoadingBlock from "./LoadingBlock";
+import NoteForm from "./NoteForm";
+import { QueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import { fetchNoteById, updateNote } from "../utility/http";
+import { queryClient } from "../utility/queryClient";
 const EditNote = () => {
-  const [data, setData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const params = useParams();
 
-  useEffect(() => {
-    setError(null);
-    setIsLoading(true);
-    fetch(`http://localhost:8001/notes/${params.id}`)
-      .then((response) => response.json())
-      .then((data) => setData(data))
-      .catch((error) => setError('Something went wrong!'))
-      .finally(() => setIsLoading(false));
-  }, []);
+  const { data, isError, isLoading, error } = useQuery({
+    queryKey: ["notes", { id: params.id }],
+    queryFn: ({ signal }) => fetchNoteById({ signal, id: params.id }),
+  });
+
+  const { mutate } = useMutation({
+    mutationFn: updateNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["notes", { id: params.id }],
+      });
+      navigate(`/view-note/${params.id}`);
+    },
+  });
 
   const noteSubmissionHandler = (note) => {
-    setError(null);
-    fetch(`http://localhost:8001/notes/${params.id}/edit`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title: note.title,
-        description: note.description,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => navigate('/'))
-      .catch((error) => setError('Something went wrong!'));
+    mutate({ id: params.id, payload: note });
   };
 
+  let content = "Fetching Notes";
+  if (isLoading) {
+    content = <LoadingBlock />;
+  }
+  if (isError) {
+    content = <ErrorBlock message={error} />;
+  }
+  if (data) {
+    content = <NoteForm data={data} onSubmit={noteSubmissionHandler} />;
+  }
+
   return (
-    <div className='new-note-container'>
+    <div className="new-note-container">
       <h1>Edit Note!</h1>
-      {error && <ErrorBlock message={error} />}
-      {isLoading && <LoadingBlock />}
-      {!isLoading && <NoteForm data={data} onSubmit={noteSubmissionHandler} />}
+      {content}
     </div>
   );
 };
